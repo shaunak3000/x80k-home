@@ -6,6 +6,20 @@
 
     <uses-sdk android:minSdkVersion="31" android:targetSdkVersion="31" />
 
+    <!-- Only for the background photos from Wikimedia Commons. build.sh fails if any other permission appears. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Android hides other apps by default; these let the home screen see the TV's apps and HDMI inputs. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.media.tv.TvInputService" />
+        </intent>
+    </queries>
+
     <application
         android:label="x80k home"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
