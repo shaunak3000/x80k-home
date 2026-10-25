@@ -377,7 +377,7 @@ public final class Home extends Activity implements Photos.Listener {
         LinearLayout cell = new LinearLayout(this);
         cell.setOrientation(LinearLayout.VERTICAL);
         cell.addView(tile);
-        cell.addView(name, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        cell.addView(name, new LinearLayout.LayoutParams(dp(GRID_TILE_DP + 10), ViewGroup.LayoutParams.WRAP_CONTENT));   // the tile's width, so long names can't widen a column
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.setMargins(0, 0, dp(14), dp(13));
         cell.setLayoutParams(params);

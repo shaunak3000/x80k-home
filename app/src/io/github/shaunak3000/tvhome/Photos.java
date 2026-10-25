@@ -93,9 +93,24 @@ final class Photos {
         }
         current = photo.getName();
         seen.add(current);
-        String credit = read(new File(photo.getPath() + ".txt"));
+        String credit = fit(read(new File(photo.getPath() + ".txt")));
         float brightness = brightness(bitmap);
         main.post(() -> listener.onPhoto(bitmap, credit, brightness));
+    }
+
+    /** Shortens the title and photographer, so the licence and source, which the licence requires, always fit on one line. */
+    private static String fit(String credit) {
+        String[] parts = credit.split(" · ");
+        for (int i = 0; i < parts.length - 2; i++) {
+            String part = parts[i].replaceAll("\\s*\\(\\d+\\)$", "");   // file names often end in "(2)"
+            int max = i == 0 ? 48 : 32;
+            if (part.length() > max) {
+                int cut = part.lastIndexOf(' ', max - 1);
+                part = part.substring(0, cut > max / 2 ? cut : max - 1).trim() + "…";
+            }
+            parts[i] = part;
+        }
+        return TextUtils.join(" · ", parts);
     }
 
     /** Average brightness, from 0 to 1, of the top-left corner where the clock sits. */

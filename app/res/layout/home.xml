@@ -112,7 +112,7 @@
         android:id="@+id/all"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#E6060810"
+        android:background="#FF060810"
         android:visibility="gone">
 
         <TextView
