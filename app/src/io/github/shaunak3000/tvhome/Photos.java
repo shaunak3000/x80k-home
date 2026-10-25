@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,7 +42,6 @@ final class Photos {
     }
 
     private static final String API = "https://commons.wikimedia.org/w/api.php?format=json&formatversion=2&action=query&";
-    private static final String IMAGES = "https://upload.wikimedia.org/";
     private static final String USER_AGENT = "x80k-home/0.1 (github.com/shaunak3000/x80k-home)";
     private static final String[] CATEGORIES = {
         "landscapes", "mountains", "coasts", "bodies of water", "forests", "islands", "volcanoes"};
@@ -141,7 +141,7 @@ final class Photos {
                 return photo;
             }
         } catch (IOException | JSONException e) {
-            // Offline, or Wikimedia answered unexpectedly: the photos already saved keep showing.
+            Log.w("x80k-home", "Photo download failed; the saved photos keep showing", e);
         }
         return null;
     }
@@ -166,9 +166,11 @@ final class Photos {
         }
     }
 
-    /** The app's only network request. Anything that isn't one of Wikimedia's two addresses is refused. */
+    /** The app's only network request. Anything but Wikimedia's API and its image servers is refused. */
     private static byte[] get(String url) throws IOException {
-        if (!url.startsWith(API) && !url.startsWith(IMAGES)) throw new IOException("Not a Wikimedia address: " + url);
+        if (!url.startsWith(API) && !url.startsWith("https://thumb.wikimedia.org/") && !url.startsWith("https://upload.wikimedia.org/")) {
+            throw new IOException("Not a Wikimedia address: " + url);
+        }
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.setInstanceFollowRedirects(false);
         connection.setConnectTimeout(10_000);

@@ -28,7 +28,7 @@ mkdir -p "$OUT/classes" "$OUT/gen"
 
 perms=$("$BT/aapt2" dump permissions "$OUT/unsigned.apk" | sed -nE "s/^uses-permission: name='([^']+)'.*/\1/p" | tr '\n' ' ')
 [ "$perms" = "android.permission.INTERNET " ] || fail "the app may ask for internet access and nothing else; it asks for: ${perms:-nothing}"
-urls=$(grep -rhoE 'https?://[^"]*' app | grep -vxE 'https://(commons|upload)\.wikimedia\.org/.*|http://schemas\.android\.com/apk/res/android' || true)
+urls=$(grep -rhoE 'https?://[^"]*' app | grep -vxE 'https://(commons|thumb|upload)\.wikimedia\.org/.*|http://schemas\.android\.com/apk/res/android' || true)
 [ -z "$urls" ] || fail "web addresses other than Wikimedia's in the app: $urls"
 foreign=$("$BT/dexdump" "$OUT/classes.dex" | awk -F"'" '/Class descriptor/ {print $2}' | grep -v "^L$PKG_DIR/" || true)
 [ -z "$foreign" ] || fail "code from outside this repo: $foreign"
