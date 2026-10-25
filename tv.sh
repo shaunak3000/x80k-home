@@ -7,6 +7,9 @@ cd "$(dirname "$0")"
 ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
 OUR_HOME=io.github.shaunak3000.tvhome/.Home
 STOCK_HOME=com.google.android.apps.tv.launcherx/.home.HomeActivity
+# Google TV gives the Home button to the highest-priority system home screen and ignores the user's choice,
+# so both of its home screens (the stock home, and the setup wizard's recovery screen) must be off for ours to get it.
+SYSTEM_HOMES="com.google.android.apps.tv.launcherx com.google.android.tungsten.setupwraith"
 
 tv() { "$ADB" -s "$TV:5555" "$@"; }
 set_home() { tv shell cmd package set-home-activity "$1" && tv shell input keyevent KEYCODE_HOME; }
@@ -14,7 +17,15 @@ set_home() { tv shell cmd package set-home-activity "$1" && tv shell input keyev
 case "${1:-}" in
   connect) "$ADB" connect "$TV:5555" ;;
   install) tv install -r build/app.apk ;;
-  home)    set_home "$OUR_HOME" ;;
-  stock)   set_home "$STOCK_HOME" ;;
-  *)       echo "usage: TV=<tv ip address> ./tv.sh connect|install|home|stock" >&2; exit 2 ;;
+  home)
+    tv shell pm path "${OUR_HOME%/*}" > /dev/null || { echo "Install the app first: ./tv.sh install" >&2; exit 1; }
+    for p in $SYSTEM_HOMES; do tv shell pm disable-user --user 0 "$p"; done
+    set_home "$OUR_HOME" ;;
+  stock)
+    for p in $SYSTEM_HOMES; do tv shell pm enable --user 0 "$p"; done
+    set_home "$STOCK_HOME" ;;
+  *)
+    echo "usage: TV=<tv ip address> ./tv.sh connect|install|home|stock" >&2
+    echo "Run ./tv.sh stock before any factory reset: it turns the setup wizard back on." >&2
+    exit 2 ;;
 esac
