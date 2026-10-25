@@ -1,0 +1,49 @@
+# Never switched off. `./tv.sh debloat` refuses any package listed here.
+
+# What you watch
+com.google.android.apps.tv.dreamx         # Ambient Mode screensaver
+com.sony.dtv.tvx                          # Live TV app for antenna channels
+com.sony.dtv.tvinput.tuner                # antenna tuner (ATSC 1.0)
+com.sony.dtv.tvinput.atsc3tuner           # antenna tuner (ATSC 3.0, NextGen TV)
+com.sony.dtv.tvinput.atsc3tuner.drmlicenseinstaller
+com.sony.dtv.tvinput.external             # HDMI inputs
+com.sony.dtv.tvinput.hardwaremanager
+com.sony.dtv.tvinput.provider
+com.android.providers.tv                  # channel list and guide
+com.sony.dtv.interactivetvutil            # broadcast interactive features; other Sony apps read its tokens
+com.vewd.core.service                     # browser engine that antenna interactive features may need
+
+# Casting and control
+com.google.android.apps.mediashell        # Chromecast built-in
+com.sony.dtv.airplayapp                   # AirPlay
+com.sony.dtv.homekit                      # HomeKit
+com.sony.dtv.webapi.core                  # Sony IP control: phone remotes, Home Assistant
+com.sony.dtv.braviasyncmenu               # HDMI-CEC (BRAVIA Sync)
+com.sony.dtv.braviasyncservice
+com.sony.dtv.braviasyncsetting
+com.sony.dtv.sonyvendorservice            # routes the remote's Netflix, YouTube, Prime Video, Disney+ buttons
+
+# The system itself
+com.android.tv.settings                   # Settings
+com.sony.dtv.settings
+com.sony.dtv.settingsprovider
+com.sony.dtv.tvapi
+com.sony.dtv.sonysystemservice
+com.sony.dtv.imeproxy
+com.sony.dtv.systemupdate                 # firmware updates
+com.sony.dtv.update
+com.android.vending                       # Play Store and app updates
+com.google.android.gms                    # Google Play services
+com.google.android.gsf
+com.android.systemui
+com.google.android.permissioncontroller
+com.google.android.packageinstaller
+com.mediatek.agent                        # MediaTek platform services
+com.mediatek.backgrounddetection
+com.mediatek.dmagent
+com.mediatek.network
+mtktvapi.agent
+
+# Switched only by `./tv.sh home` and `./tv.sh stock`, never by the list
+com.google.android.apps.tv.launcherx      # stock Google TV home
+com.google.android.tungsten.setupwraith   # setup wizard: must be back on before any factory reset

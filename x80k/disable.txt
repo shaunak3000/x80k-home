@@ -1,0 +1,40 @@
+# Switched off on the Sony KD-55X80CK (BRAVIA 4K VH21, US firmware, Android 12).
+# Disabled, never uninstalled: `./tv.sh restore` turns every one back on.
+# Only what tracks you, shows ads, or runs in the background for nothing. Apps that sit unused stay
+# installed; the home screen simply doesn't show them.
+# Cross-checked against the published VH21 lists for a KD-65X85K (AU) and an XR-55A80K (EU) in cleanyourtv.
+# Memory figures are what each used on this TV on 2026-10-24.
+
+# Viewing tracking: identifies what's on screen, including antenna and HDMI, to sell viewing data (~13 MB)
+tv.samba.ssm
+tv.samba.ssm.ui
+
+# Usage reporting and remote support (these wake up on a schedule)
+com.sonyericsson.idd.agent          # Sony usage-data agent
+com.sony.dtv.usercontext            # Sony user-context providers, started at boot
+com.qterics.da.product              # Qterics device-analytics agent
+com.sony.dtv.da.service             # Sony remote-support sessions
+com.google.android.feedback         # Google feedback reports
+
+# Ads and promotional rows
+com.sony.dtv.promos                 # Sony promotions
+com.sony.dtv.sonyselect             # Sony Select app recommendations
+com.sony.dtv.sonytab                # the Sony tab and partner rows
+
+# Store demo mode (~7 MB)
+com.sony.dtv.demosupport
+com.sony.dtv.demosystemsupport
+com.sony.dtv.multiscreendemo
+
+# Hardware this TV doesn't have (~7 MB)
+com.sony.dtv.gestureapp             # BRAVIA CAM gestures; the X80K has no camera
+
+# Voice, unused here (~62 MB): the remote's mic button stops working
+com.google.android.katniss          # Google Assistant
+com.sony.dtv.voicesearch
+com.sony.dtv.assistantadapter
+
+# Always running for features unused here
+com.google.android.tts              # Google text-to-speech (~62 MB); TalkBack and read-aloud stop
+com.sony.dtv.livingfit              # Sony's own screensaver (~21 MB); Google's Ambient Mode stays
+com.sony.dtv.seeds.iot              # BRAVIA Connect phone app and smart-speaker link (~21 MB)
