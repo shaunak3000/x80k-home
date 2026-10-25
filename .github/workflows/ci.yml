@@ -1,0 +1,22 @@
+name: ci
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned SDK packages (sdkmanager verifies their checksums)
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;37.0.0" "platforms;android-31" > /dev/null
+      - name: Build twice, check the rules, and confirm both builds are byte-identical
+        run: |
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          ./build.sh | tee first.log
+          ./build.sh | tee second.log
+          diff <(grep sha256 first.log) <(grep sha256 second.log)
