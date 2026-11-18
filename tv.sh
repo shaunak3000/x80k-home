@@ -10,8 +10,6 @@ STOCK_HOME=com.google.android.apps.tv.launcherx/.home.HomeActivity
 # Google TV gives the Home button to the highest-priority system home screen and ignores the user's choice,
 # so both of its home screens (the stock home, and the setup wizard's recovery screen) must be off for ours to get it.
 SYSTEM_HOMES="com.google.android.apps.tv.launcherx com.google.android.tungsten.setupwraith"
-# What debloat switched off. It lives on the TV itself, so restore works from any computer.
-SNAPSHOT=/data/local/tmp/x80k-home-disabled.txt
 
 tv() { "$ADB" -s "$TV:5555" "$@"; }
 set_home() { tv shell cmd package set-home-activity "$1" && tv shell input keyevent KEYCODE_HOME; }
@@ -35,14 +33,14 @@ case "${1:-}" in
     enabled=$(tv shell pm list packages -e | tr -d '\r' | sed 's/^package://')
     for p in $(packages x80k/disable.txt); do
       grep -qx "$p" <<< "$enabled" || continue   # not installed, or already off
-      tv shell "echo $p >> $SNAPSHOT"
       tv shell pm disable-user --user 0 "$p" > /dev/null && echo "off  $p"
     done ;;
   restore)
-    for p in $(tv shell cat "$SNAPSHOT" 2> /dev/null | tr -d '\r'); do
+    disabled=$(tv shell pm list packages -d | tr -d '\r' | sed 's/^package://')
+    for p in $(packages x80k/disable.txt); do
+      grep -qx "$p" <<< "$disabled" || continue
       tv shell pm enable --user 0 "$p" > /dev/null && echo "on   $p"
-    done
-    tv shell rm -f "$SNAPSHOT" ;;
+    done ;;
   *)
     echo "usage: TV=<tv ip address> ./tv.sh connect|install|home|stock|debloat|restore" >&2
     echo "Run ./tv.sh stock before any factory reset: it turns the setup wizard back on." >&2
