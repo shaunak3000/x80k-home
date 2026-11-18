@@ -79,7 +79,7 @@
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="122dp"
         android:ellipsize="end"
-        android:maxWidth="490dp"
+        android:maxWidth="700dp"
         android:shadowColor="#A6000000"
         android:shadowRadius="10"
         android:singleLine="true"
