@@ -37,4 +37,3 @@ com.sony.dtv.assistantadapter
 # Always running for features unused here
 com.google.android.tts              # Google text-to-speech (~62 MB); TalkBack and read-aloud stop
 com.sony.dtv.livingfit              # Sony's own screensaver (~21 MB); Google's Ambient Mode stays
-com.sony.dtv.seeds.iot              # BRAVIA Connect phone app and smart-speaker link (~21 MB)

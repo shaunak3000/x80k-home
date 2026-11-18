@@ -22,6 +22,7 @@ com.sony.dtv.braviasyncmenu               # HDMI-CEC (BRAVIA Sync)
 com.sony.dtv.braviasyncservice
 com.sony.dtv.braviasyncsetting
 com.sony.dtv.sonyvendorservice            # routes the remote's Netflix, YouTube, Prime Video, Disney+ buttons
+com.sony.dtv.seeds.iot                    # BRAVIA Connect link: switched off, Sony's system service crashes at start-up
 
 # The system itself
 com.android.tv.settings                   # Settings
