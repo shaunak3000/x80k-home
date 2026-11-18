@@ -48,10 +48,10 @@ System → Developer options → turn on **USB debugging**.
    brew install --cask android-platform-tools
    git clone https://github.com/shaunak3000/x80k-home && cd x80k-home
    ```
-2. Download `x80k-home-0.1.0.apk` from [Releases](https://github.com/shaunak3000/x80k-home/releases) into the
+2. Download `x80k-home-0.1.1.apk` from [Releases](https://github.com/shaunak3000/x80k-home/releases) into the
    folder, and check it:
    ```sh
-   shasum -a 256 x80k-home-0.1.0.apk    # 30ad384248d52e2fe26788b189b441d43f2e0b57ed4cbc87f9c9355184fc6272
+   shasum -a 256 x80k-home-0.1.1.apk    # 9694bcd9910f09e9755c5b358a8b3dbf25edcc024fed465799b9778be1f3d49b
    ```
    It is signed by certificate SHA-256 `4fcf37556691af0012b8706ec13d76407d33cacc5fe23bcd42e34ff6543e60cc`.
    To prove its code is this repo's code, build it yourself (below) and compare
@@ -60,7 +60,7 @@ System → Developer options → turn on **USB debugging**.
    ```sh
    export TV=192.168.1.20                     # your TV's IP address
    ./tv.sh connect                            # then press Allow on the TV, ticking "Always allow from this computer"
-   ./tv.sh install x80k-home-0.1.0.apk
+   ./tv.sh install x80k-home-0.1.1.apk
    ./tv.sh home                               # Frame becomes the home screen
    ./tv.sh debloat                            # switch off the X80K list
    ```
