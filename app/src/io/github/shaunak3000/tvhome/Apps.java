@@ -9,9 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** The TV's apps, and which of them the home row shows, in what order. */
 final class Apps {
@@ -43,6 +46,9 @@ final class Apps {
 
     final Map<String, App> all = new LinkedHashMap<>();
     final List<String> shown = new ArrayList<>();
+    // An app can vanish for a while (disabled, mid-update). These remember it, so it comes back as it was.
+    private final List<String> order = new ArrayList<>();
+    private final Set<String> known = new HashSet<>();
     private final Context context;
     private final SharedPreferences prefs;
 
@@ -63,38 +69,49 @@ final class Apps {
             all.put(pkg, new App(pkg, info.loadLabel(pm), info.activityInfo.loadBanner(pm), info.loadIcon(pm), launch));
         }
 
-        String known = prefs.getString("known", null);
-        List<String> before = split(prefs.getString("shown", ""));
-        shown.clear();
-        if (known == null) {
-            for (String pkg : FAVORITES) if (all.containsKey(pkg)) shown.add(pkg);
+        String saved = prefs.getString("known", null);
+        order.clear();
+        known.clear();
+        if (saved == null) {
+            order.addAll(FAVORITES);
         } else {
-            for (String pkg : before) if (all.containsKey(pkg)) shown.add(pkg);
-            List<String> seenBefore = split(known);
-            for (String pkg : all.keySet()) if (!seenBefore.contains(pkg)) shown.add(pkg);   // installed since last time
+            order.addAll(split(prefs.getString("shown", "")));
+            known.addAll(split(saved));
+            for (String pkg : all.keySet()) if (!known.contains(pkg) && !order.contains(pkg)) order.add(pkg);   // newly installed
         }
+        known.addAll(all.keySet());
+        refresh();
         save();
     }
 
     void hide(String pkg) {
-        shown.remove(pkg);
+        order.remove(pkg);
+        refresh();
         save();
     }
 
     void show(String pkg) {
-        if (!shown.contains(pkg)) shown.add(pkg);
+        if (!order.contains(pkg)) order.add(pkg);
+        refresh();
         save();
     }
 
+    /** Swaps two neighbouring tiles. */
     void move(int from, int to) {
-        shown.add(to, shown.remove(from));
+        Collections.swap(order, order.indexOf(shown.get(from)), order.indexOf(shown.get(to)));
+        refresh();
         save();
+    }
+
+    private void refresh() {
+        shown.clear();
+        for (String pkg : order) if (all.containsKey(pkg)) shown.add(pkg);
     }
 
     private void save() {
         prefs.edit()
-                .putString("shown", TextUtils.join(",", shown))
-                .putString("known", TextUtils.join(",", all.keySet()))
+                .putString("shown", TextUtils.join(",", order))
+                .putString("known", TextUtils.join(",", known))
                 .apply();
     }
 
