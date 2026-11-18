@@ -59,6 +59,7 @@ final class Photos {
     Photos(Context context) {
         dir = new File(context.getFilesDir(), "photos");
         dir.mkdirs();
+        seen.addAll(lines(new File(dir, "seen.txt")));   // Android often stops the app; remember what was shown
     }
 
     /** Shows a photo not seen yet, downloading one if needed (any saved photo when offline), then fetches the next. */
@@ -93,6 +94,14 @@ final class Photos {
         }
         current = photo.getName();
         seen.add(current);
+        List<String> onDisk = new ArrayList<>();
+        for (File f : onDisk()) onDisk.add(f.getName());
+        seen.retainAll(onDisk);
+        try {
+            write(new File(dir, "seen.txt"), TextUtils.join("\n", seen).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Log.w("x80k-home", "Could not save which photos were shown", e);
+        }
         String credit = fit(read(new File(photo.getPath() + ".txt")));
         float brightness = brightness(bitmap);
         main.post(() -> listener.onPhoto(bitmap, credit, brightness));
