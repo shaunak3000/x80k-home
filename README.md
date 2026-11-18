@@ -97,6 +97,12 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
   plugged in.
 - **Settings** is at the top right. The remote's gear button no longer works once Google's home screen is off.
 
+| Hold OK on a tile | All apps |
+|---|---|
+| ![The Move and Hide menu above the Netflix tile](docs/move-hide.jpg) | ![All apps: the row's apps first, then hidden ones marked Hidden](docs/all-apps.jpg) |
+
+<sub>Background photo: *Reformierte Kirche Scuol* by Agnes Monkelbaan, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via Wikimedia Commons.</sub>
+
 ## Undo
 
 ```sh
