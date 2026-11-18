@@ -4,6 +4,9 @@
 # installed; the home screen simply doesn't show them.
 # Cross-checked against the published VH21 lists for a KD-65X85K (AU) and an XR-55A80K (EU) in cleanyourtv.
 # Memory figures are what each used on this TV on 2026-10-24.
+# Known side effect: on this firmware, switching off any package makes Android's link checker
+# (com.android.statementservice) crash once, silently, at start-up: it can't create its own storage
+# folder. It's a firmware bug the list only exposes; nothing you use is affected.
 
 # Viewing tracking: identifies what's on screen, including antenna and HDMI, to sell viewing data (~13 MB)
 tv.samba.ssm
