@@ -355,14 +355,14 @@ public final class Home extends Activity implements Photos.Listener {
         TextView name = new TextView(this);
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         name.setTextColor(0xDBFFFFFF);
-        name.setSingleLine(true);
-        name.setEllipsize(TextUtils.TruncateAt.END);
+        name.setLines(2);   // the name, then "Hidden" on a line of its own so a long name can't cut it off
+        CharSequence title = TextUtils.ellipsize(app.label, name.getPaint(), dp(GRID_TILE_DP), TextUtils.TruncateAt.END);
         name.setPadding(dp(5), dp(2), dp(5), 0);
         Runnable refresh = () -> {
             boolean shown = apps.shown.contains(app.pkg);
             tile.setAlpha(shown ? 1f : 0.34f);
-            SpannableString text = new SpannableString(shown ? app.label : app.label + "  Hidden");
-            if (!shown) text.setSpan(new ForegroundColorSpan(ACCENT), app.label.length() + 2, text.length(), 0);
+            SpannableString text = new SpannableString(shown ? title : title + "\nHidden");
+            if (!shown) text.setSpan(new ForegroundColorSpan(ACCENT), title.length() + 1, text.length(), 0);
             name.setText(text);
         };
         refresh.run();
