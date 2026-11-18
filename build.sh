@@ -7,7 +7,8 @@ SDK="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 BT="$SDK/build-tools/37.0.0"
 JAR="$SDK/platforms/android-31/android.jar"
 JDK="${JAVA_HOME:?Set JAVA_HOME to a JDK 21}"
-KS="$HOME/.android/debug.keystore"
+KS="${KEYSTORE:-$HOME/.android/debug.keystore}"   # releases pass KEYSTORE and KS_PASS
+export KS_PASS="${KS_PASS:-android}"
 PKG_DIR=io/github/shaunak3000/tvhome
 OUT=build
 
@@ -42,7 +43,7 @@ lines=$(cat $(find app/src -name '*.java') | wc -l | tr -d ' ')
 mkdir -p "$(dirname "$KS")"
 [ -f "$KS" ] || "$JDK/bin/keytool" -genkeypair -keystore "$KS" -storepass android -keypass android \
   -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-"$BT/apksigner" sign --ks "$KS" --ks-pass pass:android --v4-signing-enabled false --out "$OUT/app.apk" "$OUT/unsigned.apk"
+"$BT/apksigner" sign --ks "$KS" --ks-pass env:KS_PASS --v4-signing-enabled false --out "$OUT/app.apk" "$OUT/unsigned.apk"
 
 echo "OK: internet for Wikimedia photos only, only our code, $size bytes, $lines lines"
 echo "sha256 (unsigned): $(shasum -a 256 "$OUT/unsigned.apk" | cut -d' ' -f1)"

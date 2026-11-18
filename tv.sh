@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 : "${TV:?Set TV to the IP address of the TV, for example: TV=192.168.1.20 ./tv.sh install}"
-ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
+ADB=$(command -v adb || echo "${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb")
 OUR_HOME=io.github.shaunak3000.tvhome/.Home
 STOCK_HOME=com.google.android.apps.tv.launcherx/.home.HomeActivity
 # Google TV gives the Home button to the highest-priority system home screen and ignores the user's choice,
@@ -17,7 +17,7 @@ packages() { grep -oE '^[a-z][A-Za-z0-9_.]+' "$1"; }
 
 case "${1:-}" in
   connect) "$ADB" connect "$TV:5555" ;;
-  install) tv install -r build/app.apk ;;
+  install) tv install -r "${2:-build/app.apk}" ;;
   home)
     tv shell pm path "${OUR_HOME%/*}" > /dev/null || { echo "Install the app first: ./tv.sh install" >&2; exit 1; }
     for p in $SYSTEM_HOMES; do tv shell pm disable-user --user 0 "$p"; done
@@ -42,7 +42,7 @@ case "${1:-}" in
       tv shell pm enable --user 0 "$p" > /dev/null && echo "on   $p"
     done ;;
   *)
-    echo "usage: TV=<tv ip address> ./tv.sh connect|install|home|stock|debloat|restore" >&2
+    echo "usage: TV=<tv ip address> ./tv.sh connect|install [apk]|home|stock|debloat|restore" >&2
     echo "Run ./tv.sh stock before any factory reset: it turns the setup wizard back on." >&2
     exit 2 ;;
 esac

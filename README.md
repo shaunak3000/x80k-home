@@ -29,7 +29,8 @@ own SDK tools (no Gradle, no downloaded libraries) and **fails the build** unles
 - every class in the APK comes from this repo;
 - the APK holds only the expected files and stays under 100 KB.
 
-Two builds of the same source are byte-identical, and CI checks that on every push.
+Builds are reproducible: the same source gives byte-identical output on a Mac and on GitHub's Linux runners,
+and CI checks it on every push.
 The app sends nothing about you: no app list, no viewing history, no identifiers. Wikimedia sees your TV's
 IP address when a photo downloads, the same as visiting their website.
 
@@ -37,15 +38,43 @@ IP address when a photo downloads, the same as visiting their website.
 
 You need a Mac or Linux computer on the same network as the TV.
 
-1. **On the TV:** Settings → System → About, then press OK on *Android TV OS build* 7 times. Then Settings →
-   System → Developer options → turn on **USB debugging**.
-2. **On the computer:** install JDK 21 and Google's Android command-line tools, then the pinned SDK packages:
+**On the TV:** Settings → System → About, then press OK on *Android TV OS build* 7 times. Then Settings →
+System → Developer options → turn on **USB debugging**.
+
+### Quick install: the ready-made app
+
+1. Install Google's `adb` and get this repo for `tv.sh` and the lists:
+   ```sh
+   brew install --cask android-platform-tools
+   git clone https://github.com/shaunak3000/x80k-home && cd x80k-home
+   ```
+2. Download `x80k-home-0.1.0.apk` from [Releases](https://github.com/shaunak3000/x80k-home/releases) into the
+   folder, and check it:
+   ```sh
+   shasum -a 256 x80k-home-0.1.0.apk    # 30ad384248d52e2fe26788b189b441d43f2e0b57ed4cbc87f9c9355184fc6272
+   ```
+   It is signed by certificate SHA-256 `4fcf37556691af0012b8706ec13d76407d33cacc5fe23bcd42e34ff6543e60cc`.
+   To prove its code is this repo's code, build it yourself (below) and compare
+   `unzip -p <apk> classes.dex | shasum -a 256` for both: they match.
+3. Install it:
+   ```sh
+   export TV=192.168.1.20                     # your TV's IP address
+   ./tv.sh connect                            # then press Allow on the TV, ticking "Always allow from this computer"
+   ./tv.sh install x80k-home-0.1.0.apk
+   ./tv.sh home                               # Frame becomes the home screen
+   ./tv.sh debloat                            # switch off the X80K list
+   ```
+4. Turn **USB debugging** back off. Frame and the list keep working without it.
+
+### Build it yourself
+
+1. Install JDK 21 and Google's Android command-line tools, then the pinned SDK packages:
    ```sh
    brew install openjdk@21 && brew install --cask android-commandlinetools
    export JAVA_HOME=$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home
    sdkmanager --sdk_root=$HOME/Library/Android/sdk "platform-tools" "build-tools;37.0.0" "platforms;android-31"
    ```
-3. **Build and install:**
+2. Build and install:
    ```sh
    git clone https://github.com/shaunak3000/x80k-home && cd x80k-home
    ./build.sh
@@ -55,7 +84,7 @@ You need a Mac or Linux computer on the same network as the TV.
    ./tv.sh home                  # Frame becomes the home screen
    ./tv.sh debloat               # switch off the X80K list
    ```
-4. Turn **USB debugging** back off. Frame and the list keep working without it.
+3. Turn **USB debugging** back off. Frame and the list keep working without it.
 
 To choose which apps appear in the row the first time, edit `FAVORITES` in
 [`Apps.java`](app/src/io/github/shaunak3000/tvhome/Apps.java) before building. After that, use the TV.
@@ -84,6 +113,8 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
 - **Before any factory reset, run `./tv.sh stock`.** It turns the setup wizard back on.
 - **Give changes 20 seconds before unplugging the TV.** Android saves package changes after a short delay.
 - **Firmware updates** may switch things back on. Run `./tv.sh debloat` again.
+- **The release and your own build are signed differently**, so Android won't install one over the other. To
+  switch, run `./tv.sh stock`, then `adb uninstall io.github.shaunak3000.tvhome`, then install and `./tv.sh home`.
 - **One known side effect:** with any package switched off, this firmware's link checker
   (`com.android.statementservice`) crashes once at start-up, silently, because it can't create its own storage folder.
   Nothing you use is affected.
