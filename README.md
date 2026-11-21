@@ -18,7 +18,14 @@ the tracking and bloat to switch off. No root. Nothing is uninstalled. Every cha
 - Kept exactly as they are: Google's Ambient Mode screensaver, Live TV and both antenna tuners, HDMI and
   HDMI-CEC, Chromecast, AirPlay, the remote's app buttons, the Play Store and firmware updates.
 
-On our TV the home screen went from 119 MB of memory (Google TV's) to about 45 MB.
+Measured on a KD-55X80CK, each after a fresh restart and 90 seconds to settle:
+
+| | Factory | Frame + list |
+|---|---|---|
+| Restart to home screen | 54 s | **46 s** |
+| Free memory | 987 MB | **1,200 MB** |
+| Home screen's own memory | 105 MB | **62 MB**, including two full-screen photos |
+| Home button, from another app | 124 ms | **65 ms** |
 
 ## Why you can trust it
 
