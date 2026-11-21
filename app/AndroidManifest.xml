@@ -21,7 +21,7 @@
     </queries>
 
     <application
-        android:label="x80k home"
+        android:label="Frame"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
         <activity
             android:name=".Home"

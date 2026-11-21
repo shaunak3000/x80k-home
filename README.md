@@ -1,7 +1,8 @@
-# x80k-home
+# quiet-tv
 
-A calm, ad-free home screen for the **Sony BRAVIA X80K** (2022, Google TV), plus a short, reversible list of
-the tracking and bloat to switch off. No root. Nothing is uninstalled. Every change is undone with one command.
+**Frame**, a calm, ad-free home screen for Google TV, plus a short, reversible list of the tracking and bloat to
+switch off for your TV's platform. No root. Nothing is uninstalled. Every change is undone with one command.
+Lists so far: Sony's 2022 BRAVIAs (X80K, X85K, A80K), and [yours can be next](CONTRIBUTING.md).
 
 ![Frame, the home screen: a landscape photo, a 24-hour clock, Live TV and Settings, and a row of streaming apps](docs/frame.jpg)
 
@@ -55,9 +56,9 @@ System → Developer options → turn on **USB debugging**.
 1. Install Google's `adb` and get this repo for `tv.sh` and the lists:
    ```sh
    brew install --cask android-platform-tools
-   git clone https://github.com/shaunak3000/x80k-home && cd x80k-home
+   git clone https://github.com/shaunak3000/quiet-tv && cd quiet-tv
    ```
-2. Download `x80k-home-1.0.0.apk` from [Releases](https://github.com/shaunak3000/x80k-home/releases) into the
+2. Download `x80k-home-1.0.0.apk` from [Releases](https://github.com/shaunak3000/quiet-tv/releases) into the
    folder, and check it:
    ```sh
    shasum -a 256 x80k-home-1.0.0.apk    # 72424744335def5de4e3b887dd96ef0b15b42a65e01615e6935fa1de88619b58
@@ -86,7 +87,7 @@ System → Developer options → turn on **USB debugging**.
    ```
 2. Build and install:
    ```sh
-   git clone https://github.com/shaunak3000/x80k-home && cd x80k-home
+   git clone https://github.com/shaunak3000/quiet-tv && cd quiet-tv
    ./build.sh
    export TV=192.168.1.20        # your TV's IP address
    ./tv.sh connect               # then press Allow on the TV, ticking "Always allow from this computer"

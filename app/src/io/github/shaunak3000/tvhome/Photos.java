@@ -42,7 +42,7 @@ final class Photos {
     }
 
     private static final String API = "https://commons.wikimedia.org/w/api.php?format=json&formatversion=2&action=query&";
-    private static final String USER_AGENT = "x80k-home/0.1 (github.com/shaunak3000/x80k-home)";
+    private static final String USER_AGENT = "quiet-tv/1.0 (github.com/shaunak3000/quiet-tv)";
     private static final String[] CATEGORIES = {
         "landscapes", "mountains", "coasts", "bodies of water", "forests", "islands", "volcanoes"};
     private static final int KEEP = 20;
@@ -100,7 +100,7 @@ final class Photos {
         try {
             write(new File(dir, "seen.txt"), TextUtils.join("\n", seen).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            Log.w("x80k-home", "Could not save which photos were shown", e);
+            Log.w("quiet-tv", "Could not save which photos were shown", e);
         }
         String credit = fit(read(new File(photo.getPath() + ".txt")));
         float brightness = brightness(bitmap);
@@ -165,7 +165,7 @@ final class Photos {
                 return photo;
             }
         } catch (IOException | JSONException e) {
-            Log.w("x80k-home", "Photo download failed; the saved photos keep showing", e);
+            Log.w("quiet-tv", "Photo download failed; the saved photos keep showing", e);
         }
         return null;
     }
