@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -36,18 +37,19 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /** The home screen: a changing photo, the clock, Live TV and the inputs, and a row of the TV's apps. */
 public final class Home extends Activity implements Photos.Listener {
-    private static final long PHOTO_EVERY_MS = 60_000;
     private static final float ROW_TILE_DP = 120, GRID_TILE_DP = 100;
     private static final int DARK = 0xFF0B0E14, PANEL = 0xE00E121A, ACCENT = 0xFFF2C14E;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Runnable nextPhoto = this::nextPhoto;
+    private final Runnable tick = this::tick;
     private final Runnable hideToast = this::fadeToast;
     private final BroadcastReceiver packagesChanged = new BroadcastReceiver() {
         @Override
@@ -61,7 +63,8 @@ public final class Home extends Activity implements Photos.Listener {
     private Apps apps;
     private Photos photos;
     private ImageView photoBack, photoFront;
-    private View scrimTop, all;
+    private SharedPreferences settings;
+    private View scrimTop, all, night;
     private TextView credit, toast;
     private LinearLayout chips, row;
     private HorizontalScrollView rowScroll;
@@ -86,6 +89,8 @@ public final class Home extends Activity implements Photos.Listener {
         rowScroll = findViewById(R.id.row_scroll);
         all = findViewById(R.id.all);
         grid = findViewById(R.id.grid);
+        night = findViewById(R.id.night);
+        settings = getSharedPreferences("settings", MODE_PRIVATE);
         toast.setBackground(rounded(PANEL, 99));
 
         apps = new Apps(this);
@@ -106,15 +111,14 @@ public final class Home extends Activity implements Photos.Listener {
     protected void onResume() {
         super.onResume();
         buildChips();
-        long since = System.currentTimeMillis() - lastPhotoAt;
-        if (since > 20_000) nextPhoto();   // a fresh photo each time you come back home
-        else handler.postDelayed(nextPhoto, PHOTO_EVERY_MS - since);
+        if (System.currentTimeMillis() - lastPhotoAt > 20_000) lastPhotoAt = 0;   // a fresh photo each time you come back home
+        tick();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        handler.removeCallbacks(nextPhoto);
+        handler.removeCallbacks(tick);
     }
 
     @Override
@@ -161,7 +165,7 @@ public final class Home extends Activity implements Photos.Listener {
 
     @Override
     public void onPhoto(Bitmap photo, String text, float brightness) {
-        if (isDestroyed()) return;
+        if (isDestroyed() || !settings.getBoolean("photos", true)) return;
         photoFront.setImageBitmap(photo);
         photoFront.animate().alpha(1f).setDuration(1500).withEndAction(() -> {
             photoBack.setImageBitmap(photo);
@@ -175,11 +179,18 @@ public final class Home extends Activity implements Photos.Listener {
         scrimTop.animate().alpha(Math.min(1f, 0.45f + brightness)).setDuration(1500).start();   // darker behind the clock on bright photos
     }
 
-    private void nextPhoto() {
-        lastPhotoAt = System.currentTimeMillis();
-        photos.next(this);
-        handler.removeCallbacks(nextPhoto);
-        handler.postDelayed(nextPhoto, PHOTO_EVERY_MS);
+    /** Runs every minute: night dimming, and a new photo when one is due. */
+    private void tick() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        boolean dark = settings.getBoolean("night", false) && (hour >= 22 || hour < 7);
+        night.animate().alpha(dark ? 0.6f : 0f).setDuration(1000).start();
+        long now = System.currentTimeMillis();
+        if (settings.getBoolean("photos", true) && now - lastPhotoAt >= settings.getInt("every", 1) * 60_000L) {
+            lastPhotoAt = now;
+            photos.next(this);
+        }
+        handler.removeCallbacks(tick);
+        handler.postDelayed(tick, 60_000);
     }
 
     private void buildRow() {
@@ -212,7 +223,7 @@ public final class Home extends Activity implements Photos.Listener {
     private void buildChips() {
         chips.removeAllViews();
         Intent liveTv = getPackageManager().getLeanbackLaunchIntentForPackage(Apps.LIVE_TV);
-        if (liveTv != null) addChip(R.drawable.ic_live_tv, "Live TV", liveTv);
+        if (liveTv != null) addChip(R.drawable.ic_live_tv, "Live TV", v -> open(liveTv, "Live TV"));
         TvInputManager tv = getSystemService(TvInputManager.class);
         if (tv != null) {
             List<TvInputInfo> inputs = tv.getTvInputList();
@@ -225,15 +236,15 @@ public final class Home extends Activity implements Photos.Listener {
                         || tv.getInputState(input.getId()) == TvInputManager.INPUT_STATE_DISCONNECTED) continue;
                 CharSequence name = input.loadCustomLabel(this);
                 if (name == null) name = devices.get(input.getId());
-                if (name == null) name = input.loadLabel(this);
-                addChip(R.drawable.ic_input, name,
-                        new Intent(Intent.ACTION_VIEW, TvContract.buildChannelUriForPassthroughInput(input.getId())));
+                CharSequence label = name != null ? name : input.loadLabel(this);
+                Intent intent = new Intent(Intent.ACTION_VIEW, TvContract.buildChannelUriForPassthroughInput(input.getId()));
+                addChip(R.drawable.ic_input, label, v -> open(intent, label));
             }
         }
-        addChip(R.drawable.ic_settings, "Settings", new Intent(Settings.ACTION_SETTINGS));
+        addChip(R.drawable.ic_settings, "Settings", this::showSettings);
     }
 
-    private void addChip(int icon, CharSequence label, Intent intent) {
+    private void addChip(int icon, CharSequence label, View.OnClickListener onClick) {
         TextView chip = new TextView(this);
         Drawable glyph = getDrawable(icon).mutate();
         glyph.setBounds(0, 0, dp(15), dp(15));
@@ -251,7 +262,7 @@ public final class Home extends Activity implements Photos.Listener {
         chip.setBackground(focusBackground(rounded(Color.WHITE, 15), resting));
         chip.setFocusable(true);
         chip.setNextFocusDownId(lastTileId);
-        chip.setOnClickListener(v -> open(intent, label));
+        chip.setOnClickListener(onClick);
         chip.setOnFocusChangeListener((v, focused) ->
                 v.animate().scaleX(focused ? 1.07f : 1f).scaleY(focused ? 1.07f : 1f).setDuration(160).start());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(30));
@@ -269,19 +280,57 @@ public final class Home extends Activity implements Photos.Listener {
 
     /** Holding OK on a tile offers Move and Hide. */
     private boolean showMenu(Tile tile, Apps.App app) {
+        showPopup(tile, true, dp(130), menuItem("Move", () -> startMoving(tile)), menuItem("Hide", () -> hide(app.pkg)));
+        return true;
+    }
+
+    /** The Settings button: the TV's own settings, then Frame's. OK on one of Frame's changes it in place. */
+    private void showSettings(View chip) {
+        showPopup(chip, false, dp(200),
+                menuItem("TV settings", () -> open(new Intent(Settings.ACTION_SETTINGS), "TV settings")),
+                choice(() -> "Photos: " + (settings.getBoolean("photos", true) ? "On" : "Off"), () -> {
+                    boolean on = !settings.getBoolean("photos", true);
+                    settings.edit().putBoolean("photos", on).apply();
+                    if (!on) {   // a plain background, and nothing fetched from the internet
+                        photoBack.setImageDrawable(null);
+                        credit.setText("");
+                    }
+                    lastPhotoAt = 0;
+                    tick();
+                }),
+                choice(() -> "New photo every " + settings.getInt("every", 1) + " min", () -> {
+                    int every = settings.getInt("every", 1);
+                    settings.edit().putInt("every", every == 1 ? 5 : every == 5 ? 15 : 1).apply();
+                }),
+                choice(() -> "Night dimming: " + (settings.getBoolean("night", false) ? "22:00–07:00" : "Off"), () -> {
+                    settings.edit().putBoolean("night", !settings.getBoolean("night", false)).apply();
+                    tick();
+                }));
+    }
+
+    private TextView choice(Supplier<String> label, Runnable change) {
+        TextView item = menuItem(label.get(), null);
+        item.setOnClickListener(v -> {
+            change.run();
+            item.setText(label.get());
+        });
+        return item;
+    }
+
+    private void showPopup(View anchor, boolean above, int width, View... items) {
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(5), dp(5), dp(5), dp(5));
         box.setBackground(rounded(PANEL, 10));
-        menu = new PopupWindow(box, dp(130), ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        for (View item : items) box.addView(item);
+        menu = new PopupWindow(box, width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         menu.setOnDismissListener(() -> menu = null);
-        box.addView(menuItem("Move", () -> startMoving(tile)));
-        box.addView(menuItem("Hide", () -> hide(app.pkg)));
         box.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int[] at = new int[2];
-        tile.getLocationOnScreen(at);
-        menu.showAtLocation(row, Gravity.NO_GRAVITY, at[0] + (tile.getWidth() - dp(130)) / 2, at[1] - box.getMeasuredHeight() - dp(8));
-        return true;
+        anchor.getLocationOnScreen(at);
+        int x = Math.min(at[0] + (anchor.getWidth() - width) / 2, getWindow().getDecorView().getWidth() - width - dp(24));
+        int y = above ? at[1] - box.getMeasuredHeight() - dp(8) : at[1] + anchor.getHeight() + dp(8);
+        menu.showAtLocation(row, Gravity.NO_GRAVITY, x, y);
     }
 
     private TextView menuItem(String label, Runnable action) {
