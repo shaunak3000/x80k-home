@@ -1,4 +1,5 @@
-# Switched off on the Sony KD-55X80CK (BRAVIA 4K VH21, US firmware, Android 12).
+# Switched off on Sony's 2022 BRAVIA 4K VH21 platform (X80K, X85K, A80K and siblings).
+# Tested on a KD-55X80CK, US firmware, Android 12. Packages a TV doesn't have are skipped.
 # Disabled, never uninstalled: `./tv.sh restore` turns every one back on.
 # Only what tracks you, shows ads, or runs in the background for nothing. Apps that sit unused stay
 # installed; the home screen simply doesn't show them.
