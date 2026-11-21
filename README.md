@@ -12,7 +12,8 @@ the tracking and bloat to switch off. No root. Nothing is uninstalled. Every cha
 
 - **Frame**, a home screen that shows a new featured landscape photo from Wikimedia Commons every minute,
   your apps in one row, a 24-hour clock, Live TV, your HDMI inputs and Settings. No ads, no "for you" rows.
-- **The X80K list**: 19 packages switched off, among them Samba TV (which identifies what's on your screen to sell
+  Photos can be slowed down or switched off, and the screen can dim itself at night.
+- **The list for your TV's platform**: on the X80K, 19 packages switched off, among them Samba TV (which identifies what's on your screen to sell
   viewing data), Sony's usage reporting and promos, store demo mode, and voice and text-to-speech.
 - Kept exactly as they are: Google's Ambient Mode screensaver, Live TV and both antenna tuners, HDMI and
   HDMI-CEC, Chromecast, AirPlay, the remote's app buttons, the Play Store and firmware updates.
@@ -32,7 +33,8 @@ own SDK tools (no Gradle, no downloaded libraries) and **fails the build** unles
 Builds are reproducible: the same source gives byte-identical output on a Mac and on GitHub's Linux runners,
 and CI checks it on every push.
 The app sends nothing about you: no app list, no viewing history, no identifiers. Wikimedia sees your TV's
-IP address when a photo downloads, the same as visiting their website.
+IP address when a photo downloads, the same as visiting their website. With photos switched off, Frame never goes
+online at all. [SECURITY.md](SECURITY.md) has the details and how to verify a release.
 
 ## Install
 
@@ -62,7 +64,8 @@ System → Developer options → turn on **USB debugging**.
    ./tv.sh connect                            # then press Allow on the TV, ticking "Always allow from this computer"
    ./tv.sh install x80k-home-0.1.1.apk
    ./tv.sh home                               # Frame becomes the home screen
-   ./tv.sh debloat                            # switch off the X80K list
+   ./tv.sh debloat                            # switch off the list for your TV's platform
+   ./tv.sh check                              # confirm: Frame is Home, the list is off
    ```
 4. Turn **USB debugging** back off. Frame and the list keep working without it.
 
@@ -82,7 +85,8 @@ System → Developer options → turn on **USB debugging**.
    ./tv.sh connect               # then press Allow on the TV, ticking "Always allow from this computer"
    ./tv.sh install
    ./tv.sh home                  # Frame becomes the home screen
-   ./tv.sh debloat               # switch off the X80K list
+   ./tv.sh debloat               # switch off the list for your TV's platform
+   ./tv.sh check                 # confirm: Frame is Home, the list is off
    ```
 3. Turn **USB debugging** back off. Frame and the list keep working without it.
 
@@ -95,7 +99,9 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
 - **All apps**, the last tile, shows every app; OK shows or hides one. Newly installed apps join the end of the row.
 - **Live TV** opens Sony's TV app for antenna channels. An HDMI button appears for each input that has something
   plugged in.
-- **Settings** is at the top right. The remote's gear button no longer works once Google's home screen is off.
+- **Settings**, at the top right, opens a menu: the TV's own settings, then Frame's: photos on or off, a new photo
+  every 1, 5 or 15 minutes, and night dimming from 22:00 to 07:00. OK changes a setting in place.
+  The remote's gear button no longer works once Google's home screen is off.
 
 | Hold OK on a tile | All apps |
 |---|---|
@@ -106,7 +112,7 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
 ## Undo
 
 ```sh
-./tv.sh restore    # switch the X80K list back on
+./tv.sh restore    # switch the list back on
 ./tv.sh stock      # bring back Google TV's home screen
 ```
 
@@ -118,7 +124,8 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
   deletes networks it owns. Check that your TV's current network wasn't saved by the setup wizard first.
 - **Before any factory reset, run `./tv.sh stock`.** It turns the setup wizard back on.
 - **Give changes 20 seconds before unplugging the TV.** Android saves package changes after a short delay.
-- **Firmware updates** may switch things back on. Run `./tv.sh debloat` again.
+- **After a firmware update**, run `./tv.sh check`. It reports anything switched back on, or Home handed back
+  to Google, and names the command that fixes it.
 - **The release and your own build are signed differently**, so Android won't install one over the other. To
   switch, run `./tv.sh stock`, then `adb uninstall io.github.shaunak3000.tvhome`, then install and `./tv.sh home`.
 - **One known side effect:** with any package switched off, this firmware's link checker
@@ -128,10 +135,10 @@ To choose which apps appear in the row the first time, edit `FAVORITES` in
 
 ## Other TVs
 
-Built and tested on a **KD-55X80CK** (US, Android 12, platform `BRAVIA_VH21`). Other 2022 Sony TVs on the same
-platform (X85K, A80K) will probably work. Package names differ between models and regions, so check
-[`x80k/disable.txt`](x80k/disable.txt) against your own TV before running `debloat`. `debloat` refuses to touch
-anything in [`x80k/keep.txt`](x80k/keep.txt).
+Lists live in `models/<platform>/`, and `tv.sh` asks the TV which platform it is. Tested on a **KD-55X80CK**
+(US, Android 12): its platform, `BRAVIA_VH21`, also covers 2022 sets like the X85K and A80K, and packages a TV
+doesn't have are skipped. For any other TV, `tv.sh` refuses until someone adds a list;
+[CONTRIBUTING.md](CONTRIBUTING.md) explains how, including the restart test that proves a list is safe.
 
 ## Credits
 
